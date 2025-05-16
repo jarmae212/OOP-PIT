@@ -1,0 +1,214 @@
+package wordcounterapp;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.prefs.Preferences;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+public class CounterPanel extends JPanel {
+    private JTextArea textArea;
+    private JLabel wordCountLabel, charCountLabel, wordCheckResultLabel;
+    private JTextField wordCheckField;
+    private JTextArea historyArea;
+    private ArrayList<String> history = new ArrayList<>();
+    private JMenuBar menuBar;
+    private static final String PREF_KEY = "wordHistory";
+    private Preferences prefs = Preferences.userRoot().node("wordcounterapp");
+
+    public CounterPanel(CardLayout layout, JPanel container, JFrame frame) {
+        setLayout(new BorderLayout());
+        setBackground(new Color(255, 240, 245));
+
+        loadHistory();
+
+        textArea = new JTextArea(10, 40);
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+        JScrollPane scrollPane = new JScrollPane(textArea);
+
+        JPanel topPanel = new JPanel();
+        topPanel.setBackground(new Color(255, 228, 235));
+        wordCountLabel = new JLabel("Words: 0");
+        charCountLabel = new JLabel("Characters: 0");
+        topPanel.add(wordCountLabel);
+        topPanel.add(charCountLabel);
+
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setBackground(new Color(255, 228, 235));
+        bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));
+
+        JButton backButton = new JButton("Back to Menu");
+        backButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        backButton.setBackground(new Color(255, 182, 193));
+        backButton.addActionListener(e -> {
+            layout.show(container, "Welcome");
+            frame.setJMenuBar(null);
+            frame.revalidate();
+            frame.repaint();
+        });
+        bottomPanel.add(backButton);
+
+        JPanel controlsPanel = new JPanel();
+        controlsPanel.setBackground(new Color(255, 228, 235));
+        controlsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        wordCheckField = new JTextField(10);
+        JButton checkButton = new JButton("Check Word");
+        checkButton.addActionListener(e -> checkWord());
+
+        JButton countButton = new JButton("Count");
+        countButton.addActionListener(e -> countText());
+
+        JButton clearButton = new JButton("Clear");
+        clearButton.addActionListener(e -> clearText());
+
+        JButton clearHistoryButton = new JButton("Clear All History");
+        clearHistoryButton.addActionListener(e -> clearAllHistory());
+
+        JButton saveHistoryButton = new JButton("Save History");
+        saveHistoryButton.addActionListener(e -> saveEditedHistory());
+
+        controlsPanel.add(new JLabel("Check word:"));
+        controlsPanel.add(wordCheckField);
+        controlsPanel.add(checkButton);
+        controlsPanel.add(wordCheckResultLabel = new JLabel(" "));
+        controlsPanel.add(countButton);
+        controlsPanel.add(clearButton);
+        controlsPanel.add(clearHistoryButton);
+        controlsPanel.add(saveHistoryButton);
+
+        bottomPanel.add(controlsPanel);
+
+        historyArea = new JTextArea(10, 20);
+        historyArea.setEditable(true); 
+        updateHistoryTextArea();
+        JScrollPane historyScroll = new JScrollPane(historyArea);
+        JPanel historyPanel = new JPanel(new BorderLayout());
+        historyPanel.setBorder(BorderFactory.createTitledBorder("History (editable)"));
+        historyPanel.add(historyScroll, BorderLayout.CENTER);
+
+        add(scrollPane, BorderLayout.CENTER);
+        add(topPanel, BorderLayout.NORTH);
+        add(bottomPanel, BorderLayout.SOUTH);
+        add(historyPanel, BorderLayout.EAST);
+
+        createMenuBar(frame);
+    }
+
+    private void createMenuBar(JFrame frame) {
+        menuBar = new JMenuBar();
+
+        JMenu helpMenu = new JMenu("Help");
+        JMenuItem helpItem = new JMenuItem("How to Use");
+        helpItem.addActionListener(e -> JOptionPane.showMessageDialog(frame,
+                "Type text in the box. Click 'Count' to see word and character totals.\n" +
+                        "Use the field to check for a specific word.\n" +
+                        "Click 'Clear All History' to delete everything.\n" +
+                        "Edit history directly and click 'Save History' to keep changes."));
+
+        JMenuItem aboutItem = new JMenuItem("About");
+        aboutItem.addActionListener(e -> JOptionPane.showMessageDialog(frame,
+                "Word Counter v1.0\nCreated in Java using Swing.\nHello Kitty Theme!"));
+
+        helpMenu.add(helpItem);
+        helpMenu.add(aboutItem);
+
+        menuBar.add(helpMenu);
+    }
+
+    public JMenuBar getMenuBar() {
+        return menuBar;
+    }
+
+    private void countText() {
+        String text = textArea.getText().trim();
+        int wordCount = text.isEmpty() ? 0 : text.split("\\s+").length;
+        int charCount = text.length();
+
+        wordCountLabel.setText("Words: " + wordCount);
+        charCountLabel.setText("Characters: " + charCount);
+
+        if (!text.isEmpty()) {
+            history.add(text);
+            saveHistory();
+            updateHistoryTextArea();  
+        }
+    }
+
+    private void clearText() {
+        textArea.setText("");
+        wordCountLabel.setText("Words: 0");
+        charCountLabel.setText("Characters: 0");
+        wordCheckResultLabel.setText(" ");
+    }
+
+    private void updateHistoryTextArea() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < history.size(); i++) {
+            sb.append((i + 1)).append(". ").append(history.get(i)).append("\n");
+        }
+        historyArea.setText(sb.toString());
+    }
+
+    private void checkWord() {
+        String text = textArea.getText().toLowerCase();
+        String word = wordCheckField.getText().toLowerCase().trim();
+
+        if (word.isEmpty()) {
+            wordCheckResultLabel.setText("Enter a word.");
+        } else if (text.contains(word)) {
+            wordCheckResultLabel.setText("\"" + word + "\" found.");
+        } else {
+            wordCheckResultLabel.setText("\"" + word + "\" not found.");
+        }
+    }
+
+    private void saveHistory() {
+        StringBuilder sb = new StringBuilder();
+        for (String entry : history) {
+            sb.append(entry.replace("|", " ")).append("|");
+        }
+        prefs.put(PREF_KEY, sb.toString());
+    }
+
+    private void loadHistory() {
+        String saved = prefs.get(PREF_KEY, "");
+        if (!saved.isEmpty()) {
+            history = new ArrayList<>(Arrays.asList(saved.split("\\|")));
+        }
+    }
+
+    private void clearAllHistory() {
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Are you sure you want to clear all saved history?",
+                "Confirm Clear",
+                JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            history.clear();
+            prefs.remove(PREF_KEY);
+            updateHistoryTextArea();
+            JOptionPane.showMessageDialog(this, "History cleared.");
+        }
+    }
+
+    private void saveEditedHistory() {
+       
+        String editedText = historyArea.getText();
+        String[] lines = editedText.split("\\n");
+        history.clear();
+        for (String line : lines) {
+           
+            String[] parts = line.split("\\. ", 2);
+            if (parts.length == 2) {
+                history.add(parts[1].trim());
+            } else {
+                history.add(line.trim());
+            }
+        }
+        saveHistory();
+        JOptionPane.showMessageDialog(this, "History saved.");
+        updateHistoryTextArea();  
+    }
+}
