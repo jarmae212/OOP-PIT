@@ -1,0 +1,40 @@
+package wordcounterapp;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+
+public class WelcomePanel extends JPanel {
+    public WelcomePanel(CardLayout layout, JPanel container, JFrame frame, CounterPanel counterPanel) {
+        setLayout(new BorderLayout());
+        setBackground(new Color(255, 228, 235));
+
+        JPanel centerPanel = new JPanel();
+        centerPanel.setBackground(new Color(255, 228, 235));
+        centerPanel.setLayout(new GridBagLayout());
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.insets = new Insets(10, 10, 10, 10);
+
+        JLabel title = new JLabel("Word Counter");
+        title.setFont(new Font("Serif", Font.BOLD, 40));
+        title.setForeground(new Color(255, 105, 180));
+        gbc.gridy = 0;
+        centerPanel.add(title, gbc);
+
+        JButton startButton = new JButton("Start");
+        startButton.setFont(new Font("Georgia", Font.BOLD, 18));
+        startButton.setBackground(new Color(255, 182, 193));
+        startButton.addActionListener((ActionEvent e) -> {
+            layout.show(container, "Counter");
+            frame.setJMenuBar(counterPanel.getMenuBar());
+            frame.revalidate();
+            frame.repaint();
+        });
+        gbc.gridy = 1;
+        centerPanel.add(startButton, gbc);
+
+        add(centerPanel, BorderLayout.CENTER);
+    }
+}
