@@ -1,0 +1,29 @@
+package wordcounterapp;
+
+import javax.swing.*;
+import java.awt.*;
+
+public class WordCounterApp {
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Word Counter");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(700, 500);
+
+            CardLayout layout = new CardLayout();
+            JPanel container = new JPanel(layout);
+
+            CounterPanel counter = new CounterPanel(layout, container, frame);
+            WelcomePanel welcome = new WelcomePanel(layout, container, frame, counter);
+
+            container.add(welcome, "Welcome");
+            container.add(counter, "Counter");
+
+            layout.show(container, "Welcome");
+
+            frame.add(container);
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        });
+    }
+}
