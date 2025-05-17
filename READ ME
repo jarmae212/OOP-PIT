@@ -1,0 +1,23 @@
+Name: Word Counter
+Purpose: This desktop app helps users count the number of words and characters in a text. It also allows checking if a specific word is present and keeps a history of the text entries.
+Features
+Word & Character Counter – Counts how many words and characters are in the text area.
+Word Checker – Tells if a word exists in the entered text.
+Editable History – Saves previously entered texts in a scrollable list that can be edited.
+Save & Load History – Automatically saves history using local storage and lets users update the saved list.
+Clear Functions – Clear text, clear all history, or clear specific fields.
+Menu Bar – Includes Help (how to use) and About (app info).
+Cute Hello Kitty Theme – Soft pink colors and a simple design.
+
+Known Bugs or Areas for Improvement
+HIstory Text Format – If the user edits the history badly (e.g., deletes numbering or uses wrong format), it may not save properly.
+No Undo Option – There's no way to undo changes after clearing or saving.
+No Search Highlight – Word checking only shows a message; it doesn’t highlight the word in the text.
+Limited Layout Scaling – On small screens, the UI may not resize well.
+
+Future Ideas:
+Add highlighting for found words.
+Add export to file (like .txt).
+Show date/time of saved history entries.
+Improve error messages for better user feedback.
+
